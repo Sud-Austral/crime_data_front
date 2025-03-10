@@ -284,7 +284,7 @@
 
             try {
                 //const response = await fetch('https://crime-data-api.onrender.com/query/' + encodeURIComponent(query));
-                const response = await fetch('http://186.67.61.251:8000/query/?query=' + encodeURIComponent(query))
+                const response = await fetch('https://186.67.61.251:8000/query/?query=' + encodeURIComponent(query))
                 print(response)
                 
                 if (!response.ok) {
