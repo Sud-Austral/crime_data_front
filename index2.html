@@ -254,6 +254,10 @@
             .chat-container {
                 height: calc(100vh - 120px);
             }
+            .pre-message{
+                white-space: pre; 
+                font-family: monospace;
+            }
         }
     </style>
 </head>
@@ -358,6 +362,7 @@
         
         function addMessage(text, sender) {
             const messageDiv = document.createElement('div');
+            //const messageDiv = document.createElement('pre');
             messageDiv.className = `message ${sender}-message`;
             
             const avatarLetter = sender === 'user' ? 'U' : 'S';
@@ -366,7 +371,7 @@
             messageDiv.innerHTML = `
                 <div class="message-row">
                     <div class="avatar ${avatarClass}">${avatarLetter}</div>
-                    <div class="message-content">
+                    <div class="pre-message message-content">
                         ${text}
                         <div class="message-time">${getCurrentTime()}</div>
                     </div>
