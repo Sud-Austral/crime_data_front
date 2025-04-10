@@ -345,7 +345,7 @@
                 
                 const data = await response.json();
 
-                const response_text = data.response || 'No se encontró información para esta consulta.';
+                const response_text = data.response.replaceAll("\n", "<br>") || 'No se encontró información para esta consulta.';
                 entity = data.entity_web
 
                 acumulador.push(entity)                
