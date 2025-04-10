@@ -365,7 +365,7 @@
             //const messageDiv = document.createElement('pre');
             messageDiv.className = `message ${sender}-message`;
             
-            const avatarLetter = sender === 'user' ? 'U' : 'S';
+            const avatarLetter = sender === 'user' ? 'P' : 'R';
             const avatarClass = sender === 'user' ? 'user-avatar' : 'assistant-avatar';
             
             messageDiv.innerHTML = `
@@ -391,7 +391,7 @@
             
             typingDiv.innerHTML = `
                 <div class="message-row">
-                    <div class="avatar assistant-avatar">S</div>
+                    <div class="avatar assistant-avatar">R</div>
                     <div class="message-content">
                         <div class="typing-indicator">
                             <span></span>
