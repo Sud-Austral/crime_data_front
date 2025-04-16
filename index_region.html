@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Datos de Seguridad</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #ffffff; /* Blanco */
+            color: #002D62; /* Azul oscuro */
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .header {
+            background-color: #002D62; /* Azul oscuro de la bandera chilena */
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #D52B1E; /* Rojo de la bandera chilena */
+            color: white;
+            z-index: 100; /* Asegura que el encabezado esté por encima */
+            position: sticky;
+            top: 0;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            color: #ffffff; /* Blanco */
+        }
+        
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f5f5f5; /* Gris muy claro, casi blanco */
+            height: calc(100vh - 150px); /* Ajustar altura para evitar desborde */
+            position: relative;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            height: calc(100% - 80px); /* Altura disponible menos el área de input */
+            scrollbar-width: thin;
+            scrollbar-color: #002D62 #f5f5f5;
+        }
+        
+        /* Estilos para la barra de desplazamiento en navegadores webkit (Chrome, Safari) */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: #002D62;
+            border-radius: 10px;
+        }
+        
+        .message {
+            padding: 20px;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .user-message {
+            background-color: #E6F3FF; /* Azul claro */
+            color: #002D62; /* Azul oscuro */
+            border-left: 4px solid #002D62; /* Azul oscuro */
+        }
+        
+        .assistant-message {
+            background-color: #FFF0F0; /* Rojo muy claro */
+            color: #002D62; /* Azul oscuro */
+            border-left: 4px solid #D52B1E; /* Rojo */
+        }
+        
+        .message-content {
+            max-width: 600px;
+            margin: 0 auto;
+            word-wrap: break-word; /* Asegura que las palabras largas se rompan */
+        }
+        
+        .input-area {
+            border-top: 1px solid #D52B1E; /* Rojo de la bandera chilena */
+            padding: 15px 20px;
+            background-color: #ffffff; /* Blanco */
+            display: flex;
+            justify-content: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 100; /* Asegura que esté por encima */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .input-container {
+            position: relative;
+            max-width: 768px;
+            width: 100%;
+        }
+        
+        .message-input {
+            width: 100%;
+            resize: none;
+            border: 1px solid #002D62; /* Azul oscuro */
+            border-radius: 8px;
+            padding: 14px 45px 14px 14px;
+            background-color: #ffffff; /* Blanco */
+            color: #002D62; /* Azul oscuro */
+            font-size: 16px;
+            outline: none;
+            line-height: 1.5;
+            box-sizing: border-box;
+            max-height: 150px; /* Limitar altura para que no ocupe demasiado espacio */
+            overflow-y: auto;
+        }
+        
+        .send-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            color: #002D62; /* Azul oscuro */
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+        }
+        
+        .send-button:hover {
+            color: #D52B1E; /* Rojo */
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 2px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0; /* Evita que el avatar se encoja */
+        }
+        
+        .user-avatar {
+            background-color: #002D62; /* Azul oscuro */
+        }
+        
+        .assistant-avatar {
+            background-color: #D52B1E; /* Rojo */
+        }
+        
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .typing-indicator {
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #D52B1E; /* Rojo */
+            margin-right: 3px;
+            animation: typing 1s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .model-selector {
+            position: absolute;
+            top: -40px;
+            background-color: #002D62; /* Azul oscuro */
+            border: 1px solid #D52B1E; /* Rojo */
+            border-radius: 8px;
+            padding: 5px 15px;
+            font-size: 14px;
+            color: #ffffff; /* Blanco */
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .model-selector::after {
+            content: "▼";
+            margin-left: 5px;
+            font-size: 8px;
+        }
+        
+        /* Estilos responsivos para dispositivos móviles */
+        @media (max-width: 768px) {
+            .message {
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header p {
+                font-size: 12px;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 120px);
+            }
+            .pre-message{
+                white-space: pre; 
+                font-family: monospace;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Consulta de Datos de Seguridad</h1>
+            <p>Datos extraidos desde la plataforma Stop de Carabineros de Chile tomando datos desde Enero del 2023 hasta Febrero del 2025 por comuna y a Nivel Nacional</p>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Los mensajes aparecerán aquí -->
+            </div>
+            
+            <div class="input-area">
+                <!--
+                <div class="model-selector">STOP</div>
+                -->
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        placeholder="Escribe tu consulta..." 
+                        rows="1" 
+                        id="message-input"
+                    ></textarea>
+                    <button class="send-button" id="send-button">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let entity = {'delito':null,'comuna':null,'time':{},'clasificacion':-1}
+        let acumulador = [entity]
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('chat-messages');
+        
+        // Variable para almacenar el último mensaje del usuario
+        let lastUserMessage = "";
+        
+        // Ajustar la altura del textarea a medida que se escribe
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px'; // Limitar altura máxima
+        });
+        
+        // Enviar mensaje al presionar Enter (sin Shift)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Enviar mensaje al hacer clic en el botón de enviar
+        sendButton.addEventListener('click', sendMessage);
+        
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // Guardar el mensaje del usuario
+                lastUserMessage = message;
+                
+                // Añadir mensaje del usuario
+                addMessage(message, 'user');
+                
+                // Limpiar el input
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                // Mostrar indicador de escritura
+                showTypingIndicator();
+                
+                //const response = await fetch('https://186.67.61.251:8000/query/?query=' + encodeURIComponent(lastUserMessage))
+                //console.log(entity)
+                const params = new URLSearchParams({
+                    query: lastUserMessage,
+                    entity: JSON.stringify(entity) // convierte el objeto a string
+                });
+                //console.log('https://186.67.61.251:8000/query2/?' + params.toString())
+                const response = await fetch('https://186.67.61.251:8000/query_region/?' + params.toString());
+
+                
+                const data = await response.json();
+
+                const response_text = data.response.replaceAll("\n", "<br>") || 'No se encontró información para esta consulta.';
+                entity = data.entity_web
+
+                acumulador.push(entity)                
+                // Simular respuesta retrasada del asistente
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    // Añadir la respuesta con el mismo texto que ingresó el usuario
+
+                    //addMessage(lastUserMessage, 'assistant');
+                    addMessage(response_text, 'assistant');
+                }, 1000);
+            }
+        }
+        
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            //const messageDiv = document.createElement('pre');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const avatarLetter = sender === 'user' ? 'P' : 'R';
+            const avatarClass = sender === 'user' ? 'user-avatar' : 'assistant-avatar';
+            
+            messageDiv.innerHTML = `
+                <div class="message-row">
+                    <div class="avatar ${avatarClass}">${avatarLetter}</div>
+                    <div class="pre-message message-content">
+                        ${text}
+                        <div class="message-time">${getCurrentTime()}</div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Desplazarse hacia abajo para mostrar el nuevo mensaje
+            scrollToBottom();
+        }
+        
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant-message typing-indicator-container';
+            typingDiv.id = 'typing-indicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-row">
+                    <div class="avatar assistant-avatar">R</div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+        
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Asegurar que el encabezado y área de entrada se mantengan visibles
+        window.addEventListener('resize', function() {
+            scrollToBottom();
+        });
+    </script>
+</body>
+</html>
